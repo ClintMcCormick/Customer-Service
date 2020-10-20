@@ -1,6 +1,7 @@
 package com.uncc.ticket.controller;
 
 import com.uncc.ticket.model.UsersEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import com.uncc.ticket.model.TicketEntity;
 import com.uncc.ticket.service.TicketService;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 
 @Controller
 public class TicketController {
@@ -46,19 +48,30 @@ public class TicketController {
             return "tickets/storeTicket";
         };
         ticket.setUsers(usersService.findByEmail(principal.getName()));
+
+
+        List<TicketEntity> tickets = ticketService.getAllTickets();
+
+        for(int i = 0; i < tickets.size(); i++){
+            String x = ticket.getTitle();
+            String y = tickets.get(i).getTitle();
+            if(x.contentEquals(y.toString())){
+                ticket.setId(tickets.get(i).getId());
+            }
+        }
         ticketService.storeTicket(ticket);
         return "redirect:/";
     }
 
     @RequestMapping(value = "/tickets/edit/{id}", method = RequestMethod.GET)
     public String editTicket(Model model,@PathVariable("id") Long id) {
-        // Code here
-        return "redirect:/"; //Remove this line
+       return showStoreTicket(model);
     }
 
     @RequestMapping(value = "/tickets/delete/{id}", method = RequestMethod.GET)
     public String deleteTicket(@PathVariable("id") Long id) {
         // Code here
+        ticketService.deleteById(id);
         return "redirect:/";
     }
 
